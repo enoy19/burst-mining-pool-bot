@@ -6,19 +6,24 @@ import io.enoy.burst.bot.model.ChatWallet;
 import io.enoy.burst.bot.model.Wallet;
 import io.enoy.burst.bot.model.WalletData;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class NotificationService {
 
 	private final WalletService walletService;
 	private final Set<PendBurstNotificationEventHandler> eventHandlers;
+	private final ExecutorService executorService = Executors.newFixedThreadPool(4);
 
 	public void checkNotifications() {
 		final List<ChatWallet> chatWallets = walletService.getNotificationChatWallets();
@@ -45,7 +50,18 @@ public class NotificationService {
 		event.setPending(pending);
 		event.setGrowth(pendingGrowth);
 
-		eventHandlers.forEach(handler -> handler.accept(event));
+		eventHandlers.forEach(handler -> submitHandleEvent(handler, event));
+	}
+
+	private void submitHandleEvent(final PendBurstNotificationEventHandler handler, final PendBurstNotificationEvent event) {
+		executorService.submit(() -> {
+			try {
+				handler.accept(event);
+			} catch (Exception e) {
+				log.warn("failed to send notification: {}", e.getMessage());
+				log.debug(e.getMessage(), e);
+			}
+		});
 	}
 
 	private double getPendingGrowth(ChatWallet chatWallet) {
