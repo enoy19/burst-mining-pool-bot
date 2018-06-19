@@ -1,0 +1,5 @@
+.idea
+*.iml
+/application.properties
+burst-bot.mv.db
+target/
