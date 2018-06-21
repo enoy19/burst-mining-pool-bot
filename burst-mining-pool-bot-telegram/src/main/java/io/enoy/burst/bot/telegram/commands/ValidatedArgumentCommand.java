@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 public abstract class ValidatedArgumentCommand extends ArgumentCommand {
 
 	@Override
-	protected boolean processArgument(int argumentIndex, Message message) {
+	protected final boolean processArgument(int argumentIndex, Message message) {
 		final ValidationResult validationResult = isArgumentValid(argumentIndex, message);
 
 		if (Objects.isNull(validationResult)) {

@@ -2,6 +2,7 @@ package io.enoy.burst.bot.telegram;
 
 import io.enoy.burst.bot.telegram.commands.ValidatedArgumentCommand.ValidationResult;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
@@ -17,12 +18,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class TelegramChatServiceContextless {
 
 	private final TelegramLongPollingBot bot;
+
+	@Value("#{'${bot.admins}'.split(',')}")
+	private Set<String> admins;
 
 	public Message sendMessage(long chatId, String message) {
 		return execute(new SendMessage(chatId, message));
@@ -64,6 +69,10 @@ public class TelegramChatServiceContextless {
 
 		DeleteMessage deleteMessage = new DeleteMessage(chatId, message.getMessageId());
 		execute(deleteMessage);
+	}
+
+	public boolean isAdmin(String username) {
+		return admins.contains(username);
 	}
 
 	private <R extends Serializable, T extends BotApiMethod<R>> R execute(T method) {

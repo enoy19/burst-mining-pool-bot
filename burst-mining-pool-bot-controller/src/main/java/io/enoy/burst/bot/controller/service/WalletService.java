@@ -251,4 +251,8 @@ public class WalletService {
 			chatWalletRepository.save(chatWallet);
 		});
 	}
+
+	public List<Chat> getChats() {
+		return chatRepository.findAll();
+	}
 }
