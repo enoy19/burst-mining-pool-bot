@@ -6,11 +6,11 @@ to the bot. The bot can monitor each wallet and send automatic notifications on 
 payment changes.
 
 ## Contributing
-If you want to add a mining pool, please have a look at the "data-gatherer" module.
-I will add a detailed wiki page about how to add a mining pool.
+If you want to add a mining pool, please have a look at the wiki: 
+[Adding support for your pool software](https://github.com/enoy19/burst-mining-pool-bot/wiki/Adding-support-for-your-pool-software)
 
-## Hosting
-Coming soon in wiki...
+## Hosting & Configuration
+Wiki: [Hosting and Configuration](https://github.com/enoy19/burst-mining-pool-bot/wiki/Hosting-and-Configuration)
 
 ## Supported Mining Pools
  * CryptoGuru Pool Software
