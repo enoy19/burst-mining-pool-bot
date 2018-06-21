@@ -1,7 +1,7 @@
 # Burst Mining Pool Telegram Bot
 This project is a Spring-boot application, that hosts a telegram bot 
 which can update burst-miners on their current pending payments of their mining pool.
-The bot supports private chats as well as group chats. You can add multiple wallets
+The bot currently only supports private chats. You can add multiple wallets
 to the bot. The bot can monitor each wallet and send automatic notifications on pending
 payment changes.
 
