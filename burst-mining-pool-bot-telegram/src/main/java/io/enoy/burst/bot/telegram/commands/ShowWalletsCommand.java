@@ -42,6 +42,6 @@ public class ShowWalletsCommand implements Command {
 
 	@Override
 	public boolean accepts(String message) {
-		return message.trim().equalsIgnoreCase("/show_wallets");
+		return message.equalsIgnoreCase("/show_wallets");
 	}
 }

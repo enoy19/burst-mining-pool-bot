@@ -68,7 +68,7 @@ public class RemoveWalletCommand extends ValidatedArgumentCommand {
 
 	@Override
 	public boolean accepts(String message) {
-		return message.trim().equalsIgnoreCase("/remove_wallet");
+		return message.equalsIgnoreCase("/remove_wallet");
 	}
 
 }

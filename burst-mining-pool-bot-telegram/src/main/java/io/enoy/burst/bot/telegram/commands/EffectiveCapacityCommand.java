@@ -26,7 +26,7 @@ public class EffectiveCapacityCommand extends WalletDataCommand {
 
 	@Override
 	public boolean accepts(String message) {
-		return message.trim().equalsIgnoreCase("/effective_capacity");
+		return message.equalsIgnoreCase("/effective_capacity");
 	}
 
 }
