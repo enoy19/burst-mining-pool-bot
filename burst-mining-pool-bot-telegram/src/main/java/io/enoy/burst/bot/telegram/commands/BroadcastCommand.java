@@ -67,6 +67,6 @@ public class BroadcastCommand extends ValidatedArgumentCommand {
 
 	@Override
 	public boolean accepts(String message) {
-		return message.trim().equals("/broadcast");
+		return message.equals("/broadcast");
 	}
 }

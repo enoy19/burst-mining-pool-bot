@@ -26,7 +26,7 @@ public class ConfirmedDeadlinesCommand extends WalletDataCommand {
 
 	@Override
 	public boolean accepts(String message) {
-		return message.trim().equalsIgnoreCase("/confirmed_deadlines");
+		return message.equalsIgnoreCase("/confirmed_deadlines");
 	}
 
 }
