@@ -25,6 +25,6 @@ public class PendingCommand extends WalletDataCommand {
 
 	@Override
 	public boolean accepts(String message) {
-		return message.trim().equalsIgnoreCase("/pending");
+		return message.equalsIgnoreCase("/pending");
 	}
 }

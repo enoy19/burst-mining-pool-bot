@@ -76,7 +76,7 @@ public class AddWalletCommand extends ValidatedArgumentCommand {
 
 	@Override
 	public boolean accepts(String message) {
-		return message.trim().equalsIgnoreCase("/add_wallet");
+		return message.equalsIgnoreCase("/add_wallet");
 	}
 
 }

@@ -26,7 +26,7 @@ public class ShareCommand extends WalletDataCommand {
 
 	@Override
 	public boolean accepts(String message) {
-		return message.trim().equalsIgnoreCase("/share");
+		return message.equalsIgnoreCase("/share");
 	}
 
 }

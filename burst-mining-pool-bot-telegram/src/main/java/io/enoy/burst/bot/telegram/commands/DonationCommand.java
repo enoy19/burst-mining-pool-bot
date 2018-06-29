@@ -57,6 +57,6 @@ public class DonationCommand implements Command {
 
 	@Override
 	public boolean accepts(String message) {
-		return message.trim().equalsIgnoreCase("/donate");
+		return message.equalsIgnoreCase("/donate");
 	}
 }

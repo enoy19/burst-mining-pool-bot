@@ -3,6 +3,7 @@ package io.enoy.burst.bot.telegram;
 import io.enoy.burst.bot.telegram.commands.Command;
 import io.enoy.burst.bot.telegram.scope.TelegramChatScope;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.api.objects.Message;
 
@@ -20,11 +21,14 @@ public class TelegramMessageHandler {
 	private final Set<Command> commands;
 	private Command currentCommand;
 
+	@Value("${bot.username}")
+	private String botUsername;
+
 	public synchronized void handleMessage(Message message) {
 		setupCommand(message);
 
 		if (Objects.isNull(currentCommand)) {
-			// command not found
+			// command not found / no command executed
 			return;
 		}
 
@@ -40,15 +44,22 @@ public class TelegramMessageHandler {
 	}
 
 	private synchronized void setupCommand(Message message) {
-		if (Objects.isNull(currentCommand)) {
-			final Optional<Command> matchingCommandOpt = findMatchingCommand(message);
-			matchingCommandOpt.ifPresent(command -> {
-				this.currentCommand = command;
-				this.currentCommand.init();
-			});
+		final Boolean userChat = message.getChat().isUserChat();
 
-			if (!matchingCommandOpt.isPresent()) {
-				chatService.sendMessage("Command not found.");
+		if (Objects.isNull(currentCommand) && message.hasText()) {
+			final String messageText = message.getText();
+
+			if(userChat && messageText.startsWith("/")
+					|| !userChat && messageText.matches("/\\w*@"+botUsername)) {
+				final Optional<Command> matchingCommandOpt = findMatchingCommand(message);
+				matchingCommandOpt.ifPresent(command -> {
+					this.currentCommand = command;
+					this.currentCommand.init();
+				});
+
+				if (!matchingCommandOpt.isPresent()) {
+					chatService.sendMessage("Command not found.");
+				}
 			}
 		}
 	}
@@ -58,7 +69,11 @@ public class TelegramMessageHandler {
 			return
 					commands.stream()
 							.sorted(Comparator.comparing(Object::toString))
-							.filter(command -> command.accepts(message.getText()))
+							.filter(command -> {
+								String messageText = message.getText().trim();
+								messageText = messageText.replaceAll("@"+botUsername, "");
+								return command.accepts(messageText);
+							})
 							.findFirst();
 		}
 

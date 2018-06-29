@@ -94,7 +94,7 @@ public class NotificationThresholdCommand extends ValidatedArgumentCommand {
 
 	@Override
 	public boolean accepts(String message) {
-		return message.trim().equalsIgnoreCase("/notification_threshold");
+		return message.equalsIgnoreCase("/notification_threshold");
 	}
 
 	private double getThreshold(Message message) throws ParseException {
