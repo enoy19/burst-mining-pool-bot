@@ -12,6 +12,8 @@ import java.util.List;
 public interface WalletDataRepository extends JpaRepository<WalletData, Long> {
 
 	WalletData findFirstByWallet_IdOrderByTimestampDesc(String walletId);
+	List<WalletData> findFirst2ByWallet_IdOrderByTimestampDesc(String walletId);
+
 	List<WalletData> findAllByWallet(Wallet wallet);
 	List<WalletData> findAllByWalletAndTimestampAfter(Wallet wallet, Date afterThisDate);
 }
