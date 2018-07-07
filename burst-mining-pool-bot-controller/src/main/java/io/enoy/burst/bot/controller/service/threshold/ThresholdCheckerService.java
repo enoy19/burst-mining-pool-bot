@@ -15,7 +15,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ThresholdCheckerService {
 
-	private Set<ThresholdChecker> thresholdCheckers;
+	private final Set<ThresholdChecker> thresholdCheckers;
 	private Map<ThresholdMode, ThresholdChecker> mappedThresholdCheckers;
 
 	@PostConstruct
