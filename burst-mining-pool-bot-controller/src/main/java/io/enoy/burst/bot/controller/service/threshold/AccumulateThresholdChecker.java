@@ -17,9 +17,11 @@ public class AccumulateThresholdChecker implements ThresholdChecker {
 	private final WalletService walletService;
 
 	@Override
-	public boolean isThresholdMet(ChatWallet chatWallet) {
+	public ThresholdCheckResult check(ChatWallet chatWallet) {
 		final double pendingGrowth = getPendingGrowth(chatWallet);
-		return pendingGrowth > chatWallet.getNotificationThreshold();
+		final boolean thresholdMet = pendingGrowth > chatWallet.getNotificationThreshold();
+
+		return new ThresholdCheckResult(thresholdMet, pendingGrowth);
 	}
 
 	private double getPendingGrowth(ChatWallet chatWallet) {

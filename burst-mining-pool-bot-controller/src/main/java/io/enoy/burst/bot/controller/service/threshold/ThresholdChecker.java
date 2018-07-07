@@ -4,6 +4,6 @@ import io.enoy.burst.bot.model.ChatWallet;
 import io.enoy.burst.bot.model.ThresholdMode;
 
 public interface ThresholdChecker {
-	boolean isThresholdMet(ChatWallet chatWallet);
+	ThresholdCheckResult check(ChatWallet chatWallet);
 	ThresholdMode getThresholdMode();
 }

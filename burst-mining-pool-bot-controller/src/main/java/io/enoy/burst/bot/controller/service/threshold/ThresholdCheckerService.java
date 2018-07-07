@@ -25,9 +25,9 @@ public class ThresholdCheckerService {
 		}
 	}
 
-	public boolean isThresholdMet(ChatWallet chatWallet) {
+	public ThresholdCheckResult check(ChatWallet chatWallet) {
 		final ThresholdChecker thresholdChecker = getMatchingThresholdChecker(chatWallet.getThresholdMode());
-		return thresholdChecker.isThresholdMet(chatWallet);
+		return thresholdChecker.check(chatWallet);
 	}
 
 	private ThresholdChecker getMatchingThresholdChecker(ThresholdMode thresholdMode) {
