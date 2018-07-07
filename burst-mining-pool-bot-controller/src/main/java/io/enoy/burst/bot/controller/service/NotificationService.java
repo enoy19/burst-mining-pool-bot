@@ -2,8 +2,9 @@ package io.enoy.burst.bot.controller.service;
 
 import io.enoy.burst.bot.commons.PendBurstNotificationEvent;
 import io.enoy.burst.bot.commons.PendBurstNotificationEventHandler;
+import io.enoy.burst.bot.controller.service.threshold.ThresholdCheckResult;
+import io.enoy.burst.bot.controller.service.threshold.ThresholdCheckerService;
 import io.enoy.burst.bot.model.ChatWallet;
-import io.enoy.burst.bot.model.Wallet;
 import io.enoy.burst.bot.model.WalletData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,6 +23,7 @@ public class NotificationService {
 
 	private final WalletService walletService;
 	private final Set<PendBurstNotificationEventHandler> eventHandlers;
+	private final ThresholdCheckerService thresholdCheckerService;
 	private final ExecutorService executorService = Executors.newFixedThreadPool(4);
 
 	public void checkNotifications() {
@@ -34,15 +35,14 @@ public class NotificationService {
 	}
 
 	private void checkChatWalletNotification(ChatWallet chatWallet) {
-		final double pendingGrowth = getPendingGrowth(chatWallet);
-		final boolean thresholdReached = pendingGrowth > chatWallet.getNotificationThreshold();
+		ThresholdCheckResult thresholdMet = thresholdCheckerService.check(chatWallet);
 
-		if (thresholdReached) {
+		if (thresholdMet.isThresholdMet()) {
 			final double pending = walletService.getLatestWalletData(chatWallet.getWallet())
 					.map(WalletData::getPending)
 					.orElse(0d);
 
-			sendNotification(chatWallet, pending, pendingGrowth);
+			sendNotification(chatWallet, pending, thresholdMet.getChange());
 			walletService.updateLastThresholdReached(chatWallet.getId(), new Date());
 		}
 	}
@@ -66,17 +66,6 @@ public class NotificationService {
 				log.debug(e.getMessage(), e);
 			}
 		});
-	}
-
-	private double getPendingGrowth(ChatWallet chatWallet) {
-		final Date lastThresholdReached = chatWallet.getLastThresholdReached();
-		final Wallet wallet = chatWallet.getWallet();
-
-		if (Objects.isNull(lastThresholdReached)) {
-			return walletService.getPendingGrowth(wallet);
-		} else {
-			return walletService.getPendingGrowth(wallet, lastThresholdReached);
-		}
 	}
 
 }
