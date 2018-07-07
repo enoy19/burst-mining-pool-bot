@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -26,7 +27,13 @@ public class ThresholdCheckerService {
 	}
 
 	public ThresholdCheckResult check(ChatWallet chatWallet) {
-		final ThresholdChecker thresholdChecker = getMatchingThresholdChecker(chatWallet.getThresholdMode());
+		ThresholdMode thresholdMode = chatWallet.getThresholdMode();
+
+		if (Objects.isNull(thresholdMode)) {
+			thresholdMode = ThresholdMode.DEFAULT_THRESHOLD_MODE;
+		}
+
+		final ThresholdChecker thresholdChecker = getMatchingThresholdChecker(thresholdMode);
 		return thresholdChecker.check(chatWallet);
 	}
 
