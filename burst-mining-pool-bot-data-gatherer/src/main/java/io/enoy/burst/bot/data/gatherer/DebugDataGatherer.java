@@ -12,7 +12,7 @@ import java.util.*;
 
 @Component
 @RequiredArgsConstructor
-@Profile("debug-gatherer")
+@Profile("debug")
 public class DebugDataGatherer implements WalletDataGatherer {
 
 	private static final Random RANDOM = new Random();
@@ -26,7 +26,7 @@ public class DebugDataGatherer implements WalletDataGatherer {
 			final Optional<WalletData> latestWalletDataOpt = walletService.getLatestWalletData(wallet);
 			final double previousPending = latestWalletDataOpt.map(WalletData::getPending).orElse(0d);
 
-			double newPending = previousPending + RANDOM.nextDouble() * 100;
+			double newPending = previousPending + RANDOM.nextDouble() * 80;
 			if(newPending > 100) { // payout at 100
 				newPending = 0;
 			}
