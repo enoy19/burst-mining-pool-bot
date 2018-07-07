@@ -1,9 +1,6 @@
 package io.enoy.burst.bot.controller.service;
 
-import io.enoy.burst.bot.model.Chat;
-import io.enoy.burst.bot.model.ChatWallet;
-import io.enoy.burst.bot.model.Wallet;
-import io.enoy.burst.bot.model.WalletData;
+import io.enoy.burst.bot.model.*;
 import io.enoy.burst.bot.model.repositories.ChatRepository;
 import io.enoy.burst.bot.model.repositories.ChatWalletRepository;
 import io.enoy.burst.bot.model.repositories.WalletDataRepository;
@@ -293,5 +290,13 @@ public class WalletService {
 
 	public List<Chat> getChats() {
 		return chatRepository.findAll();
+	}
+
+	public void setThresholdMode(String chatId, String burstAddress, ThresholdMode mode) throws NoSuchElementException {
+		Optional<ChatWallet> chatWalletOpt = getChatWallet(chatId, burstAddress);
+		ChatWallet chatWallet = chatWalletOpt.get();
+
+		chatWallet.setThresholdMode(mode);
+		chatWalletRepository.save(chatWallet);
 	}
 }
