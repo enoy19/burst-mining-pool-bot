@@ -261,7 +261,8 @@ public class WalletService {
 	}
 
 	private double accumulateWalletPayouts(List<WalletData> walletDataList) {
-		return accumulateWalletPendingChange(walletDataList, change -> change < 0);
+		final double payouts = accumulateWalletPendingChange(walletDataList, change -> change < 0);
+		return Math.abs(payouts);
 	}
 
 	private double accumulateWalletPendingChange(List<WalletData> walletDataList, Function<Double, Boolean> countCondition) {
