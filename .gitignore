@@ -1,5 +1,6 @@
 .idea
 *.iml
 /application.properties
-burst-bot.mv.db
+*.mv.db
+*.trace.db
 target/
