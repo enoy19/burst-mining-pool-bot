@@ -58,6 +58,17 @@ public class WalletService {
 		return Optional.ofNullable(walletData);
 	}
 
+	/**
+	 * @return optional list of wallet data if there were exactly two entries otherwise empty optional
+	 */
+	public Optional<List<WalletData>> getLatestTwoWalletData(Wallet wallet) {
+		final List<WalletData> walletData = walletDataRepository.findFirst2ByWallet_IdOrderByTimestampDesc(wallet.getId());
+		if (walletData.size() == 2) {
+			return Optional.of(walletData);
+		}
+		return Optional.empty();
+	}
+
 	public List<Wallet> getOnlyRegisteredWallets(List<String> walletIds) {
 		return walletRepository.findAllByIdIn(walletIds);
 	}
