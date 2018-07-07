@@ -7,7 +7,7 @@
 	<groupId>io.enoy.burst</groupId>
 	<artifactId>burst-mining-pool-bot</artifactId>
 	<packaging>pom</packaging>
-	<version>1.2.0-SNAPSHOT</version>
+	<version>1.2.0</version>
 	<modules>
 		<module>burst-mining-pool-bot-model</module>
 		<module>burst-mining-pool-bot-controller</module>
