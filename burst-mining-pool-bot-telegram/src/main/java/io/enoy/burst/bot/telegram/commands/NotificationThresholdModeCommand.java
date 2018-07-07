@@ -88,6 +88,11 @@ public class NotificationThresholdModeCommand extends ValidatedArgumentCommand {
 		return null;
 	}
 
+	@Override
+	public void shutdown() {
+		chatService.removeKeyboard();
+	}
+
 	private String getThresholdModesMessage() {
 		final String thresholdModesHelpTexts =
 				Arrays.stream(ThresholdMode.values())
