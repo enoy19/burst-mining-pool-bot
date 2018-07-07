@@ -10,23 +10,23 @@ import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
-public class AccumulateThresholdChecker extends AbstractAccumulateThresholdChecker {
+public class PayoutThresholdChecker extends AbstractAccumulateThresholdChecker {
 
 	private final WalletService walletService;
 
 	@Override
 	protected double getPendingChangeInternal(Wallet wallet) {
-		return walletService.getPendingGrowth(wallet);
+		return walletService.getPayouts(wallet);
 	}
 
 	@Override
 	protected double getPendingChangeInternal(Wallet wallet, Date lastThresholdReached) {
-		return walletService.getPendingGrowth(wallet, lastThresholdReached);
+		return walletService.getPayouts(wallet, lastThresholdReached);
 	}
 
 	@Override
 	public ThresholdMode getThresholdMode() {
-		return ThresholdMode.ACCUMULATE;
+		return ThresholdMode.PAYOUT;
 	}
 
 }

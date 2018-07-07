@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -233,11 +234,37 @@ public class WalletService {
 	}
 
 	public double getPendingGrowth(Wallet wallet, Date afterThisDate) {
-		final List<WalletData> walletDataList = walletDataRepository.findAllByWalletAndTimestampAfter(wallet, afterThisDate);
+		final List<WalletData> walletDataList = getWalletDataSince(wallet, afterThisDate);
 		return accumulateWalletPendingGrowth(walletDataList);
 	}
 
+	public double getPayouts(Wallet wallet) {
+		final List<WalletData> walletDataList = walletDataRepository.findAllByWallet(wallet);
+		return accumulateWalletPayouts(walletDataList);
+	}
+
+	public double getPayouts(Wallet wallet, Date afterThisDate) {
+		final List<WalletData> walletDataList = getWalletDataSince(wallet, afterThisDate);
+		return accumulateWalletPayouts(walletDataList);
+	}
+
+	public List<WalletData> getWalletDataSince(Wallet wallet, Date date) {
+		return walletDataRepository.findAllByWalletAndTimestampAfter(wallet, date);
+	}
+
+	public List<WalletData> getAllWalletData(Wallet wallet) {
+		return walletDataRepository.findAllByWallet(wallet);
+	}
+
 	private double accumulateWalletPendingGrowth(List<WalletData> walletDataList) {
+		return accumulateWalletPendingChange(walletDataList, change -> change > 0);
+	}
+
+	private double accumulateWalletPayouts(List<WalletData> walletDataList) {
+		return accumulateWalletPendingChange(walletDataList, change -> change < 0);
+	}
+
+	private double accumulateWalletPendingChange(List<WalletData> walletDataList, Function<Double, Boolean> countCondition) {
 		double pendingAccumulated = 0;
 
 		if (walletDataList.size() >= 2) {
@@ -248,7 +275,7 @@ public class WalletService {
 
 				double change = pending - prevPending;
 				prevPending = pending;
-				if (change > 0) {
+				if (countCondition.apply(change)) {
 					pendingAccumulated += change;
 				}
 			}
