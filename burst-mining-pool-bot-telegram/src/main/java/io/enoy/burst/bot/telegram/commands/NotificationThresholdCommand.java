@@ -63,7 +63,7 @@ public class NotificationThresholdCommand extends ValidatedArgumentCommand {
 	@Override
 	protected ValidationResult isArgumentValid(int argumentIndex, Message message) {
 		if (argumentIndex == 1) {
-			if(walletKeyboardService.isAbortMessage(message)) {
+			if (walletKeyboardService.isAbortMessage(message)) {
 				return ValidationResult.aborted();
 			}
 
@@ -84,6 +84,7 @@ public class NotificationThresholdCommand extends ValidatedArgumentCommand {
 				return ValidationResult.invalidArgument("Could not parse number.");
 			}
 		}
+		chatService.sendMessage("Invalid argument!");
 		return null;
 	}
 
