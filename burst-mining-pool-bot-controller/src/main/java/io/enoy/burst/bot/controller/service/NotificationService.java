@@ -29,17 +29,21 @@ public class NotificationService {
 		final List<ChatWallet> chatWallets = walletService.getNotificationChatWallets();
 
 		for (ChatWallet chatWallet : chatWallets) {
-			final double pendingGrowth = getPendingGrowth(chatWallet);
-			final boolean thresholdReached = pendingGrowth > chatWallet.getNotificationThreshold();
+			checkChatWalletNotification(chatWallet);
+		}
+	}
 
-			if (thresholdReached) {
-				final double pending = walletService.getLatestWalletData(chatWallet.getWallet())
-						.map(WalletData::getPending)
-						.orElse(0d);
+	private void checkChatWalletNotification(ChatWallet chatWallet) {
+		final double pendingGrowth = getPendingGrowth(chatWallet);
+		final boolean thresholdReached = pendingGrowth > chatWallet.getNotificationThreshold();
 
-				sendNotification(chatWallet, pending, pendingGrowth);
-				walletService.updateLastThresholdReached(chatWallet.getId(), new Date());
-			}
+		if (thresholdReached) {
+			final double pending = walletService.getLatestWalletData(chatWallet.getWallet())
+					.map(WalletData::getPending)
+					.orElse(0d);
+
+			sendNotification(chatWallet, pending, pendingGrowth);
+			walletService.updateLastThresholdReached(chatWallet.getId(), new Date());
 		}
 	}
 
