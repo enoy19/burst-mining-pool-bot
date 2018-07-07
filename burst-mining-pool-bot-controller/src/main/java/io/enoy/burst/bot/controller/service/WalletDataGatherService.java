@@ -20,12 +20,17 @@ public class WalletDataGatherService {
 	private final WalletDataRepository walletDataRepository;
 	private final NotificationService notificationService;
 
-	public List<WalletData> gatherDataOfAllRegisteredWallets() {
+	public void trigger() {
+		List<WalletData> walletData = gatherDataOfAllRegisteredWallets();
+		persistWalletDataWithCurrentTimestamp(walletData);
+	}
+
+	private List<WalletData> gatherDataOfAllRegisteredWallets() {
 		final List<Wallet> wallets = walletRepository.findAll();
 		return walletDataGatherer.gatherDataOf(wallets);
 	}
 
-	public void persistWalletDataWithCurrentTimestamp(List<WalletData> walletData) {
+	private void persistWalletDataWithCurrentTimestamp(List<WalletData> walletData) {
 		final Date now = new Date();
 		walletData.forEach(w -> w.setTimestamp(now));
 		walletDataRepository.saveAll(walletData);
