@@ -233,8 +233,8 @@ public class WalletService {
 		return accumulateWalletPendingGrowth(walletDataList);
 	}
 
-	public double getPendingGrowth(Wallet wallet, Date afterThisDate) {
-		final List<WalletData> walletDataList = getWalletDataSince(wallet, afterThisDate);
+	public double getPendingGrowth(Wallet wallet, Date since) {
+		final List<WalletData> walletDataList = getWalletDataSince(wallet, since);
 		return accumulateWalletPendingGrowth(walletDataList);
 	}
 
@@ -243,13 +243,13 @@ public class WalletService {
 		return accumulateWalletPayouts(walletDataList);
 	}
 
-	public double getPayouts(Wallet wallet, Date afterThisDate) {
-		final List<WalletData> walletDataList = getWalletDataSince(wallet, afterThisDate);
+	public double getPayouts(Wallet wallet, Date since) {
+		final List<WalletData> walletDataList = getWalletDataSince(wallet, since);
 		return accumulateWalletPayouts(walletDataList);
 	}
 
-	public List<WalletData> getWalletDataSince(Wallet wallet, Date date) {
-		return walletDataRepository.findAllByWalletAndTimestampAfter(wallet, date);
+	public List<WalletData> getWalletDataSince(Wallet wallet, Date since) {
+		return walletDataRepository.findAllByWalletAndTimestampAfter(wallet, since);
 	}
 
 	public List<WalletData> getAllWalletData(Wallet wallet) {
