@@ -23,8 +23,7 @@ public final class WalletDataGathererScheduler {
 	 */
 	@Scheduled(fixedRate = 1000L * 60L * 4)
 	private void startWalletGatherer() {
-		List<WalletData> walletData = walletDataGatherService.gatherDataOfAllRegisteredWallets();
-		walletDataGatherService.persistWalletDataWithCurrentTimestamp(walletData);
+		walletDataGatherService.trigger();
 	}
 
 }

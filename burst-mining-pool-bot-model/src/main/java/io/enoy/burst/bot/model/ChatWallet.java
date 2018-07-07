@@ -28,4 +28,7 @@ public class ChatWallet {
 	@Column
 	private Date lastThresholdReached;
 
+	@Column
+	private ThresholdMode thresholdMode = ThresholdMode.DEFAULT_THRESHOLD_MODE;
+
 }
