@@ -1,9 +1,6 @@
 package io.enoy.burst.bot.controller.service;
 
-import io.enoy.burst.bot.model.Chat;
-import io.enoy.burst.bot.model.ChatWallet;
-import io.enoy.burst.bot.model.Wallet;
-import io.enoy.burst.bot.model.WalletData;
+import io.enoy.burst.bot.model.*;
 import io.enoy.burst.bot.model.repositories.ChatRepository;
 import io.enoy.burst.bot.model.repositories.ChatWalletRepository;
 import io.enoy.burst.bot.model.repositories.WalletDataRepository;
@@ -14,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,6 +54,17 @@ public class WalletService {
 	public Optional<WalletData> getLatestWalletData(Wallet wallet) {
 		final WalletData walletData = walletDataRepository.findFirstByWallet_IdOrderByTimestampDesc(wallet.getId());
 		return Optional.ofNullable(walletData);
+	}
+
+	/**
+	 * @return optional list of wallet data if there were exactly two entries otherwise empty optional
+	 */
+	public Optional<List<WalletData>> getLatestTwoWalletData(Wallet wallet) {
+		final List<WalletData> walletData = walletDataRepository.findFirst2ByWallet_IdOrderByTimestampDesc(wallet.getId());
+		if (walletData.size() == 2) {
+			return Optional.of(walletData);
+		}
+		return Optional.empty();
 	}
 
 	public List<Wallet> getOnlyRegisteredWallets(List<String> walletIds) {
@@ -221,12 +230,39 @@ public class WalletService {
 		return accumulateWalletPendingGrowth(walletDataList);
 	}
 
-	public double getPendingGrowth(Wallet wallet, Date afterThisDate) {
-		final List<WalletData> walletDataList = walletDataRepository.findAllByWalletAndTimestampAfter(wallet, afterThisDate);
+	public double getPendingGrowth(Wallet wallet, Date since) {
+		final List<WalletData> walletDataList = getWalletDataSince(wallet, since);
 		return accumulateWalletPendingGrowth(walletDataList);
 	}
 
+	public double getPayouts(Wallet wallet) {
+		final List<WalletData> walletDataList = walletDataRepository.findAllByWallet(wallet);
+		return accumulateWalletPayouts(walletDataList);
+	}
+
+	public double getPayouts(Wallet wallet, Date since) {
+		final List<WalletData> walletDataList = getWalletDataSince(wallet, since);
+		return accumulateWalletPayouts(walletDataList);
+	}
+
+	public List<WalletData> getWalletDataSince(Wallet wallet, Date since) {
+		return walletDataRepository.findAllByWalletAndTimestampAfter(wallet, since);
+	}
+
+	public List<WalletData> getAllWalletData(Wallet wallet) {
+		return walletDataRepository.findAllByWallet(wallet);
+	}
+
 	private double accumulateWalletPendingGrowth(List<WalletData> walletDataList) {
+		return accumulateWalletPendingChange(walletDataList, change -> change > 0);
+	}
+
+	private double accumulateWalletPayouts(List<WalletData> walletDataList) {
+		final double payouts = accumulateWalletPendingChange(walletDataList, change -> change < 0);
+		return Math.abs(payouts);
+	}
+
+	private double accumulateWalletPendingChange(List<WalletData> walletDataList, Function<Double, Boolean> countCondition) {
 		double pendingAccumulated = 0;
 
 		if (walletDataList.size() >= 2) {
@@ -237,7 +273,7 @@ public class WalletService {
 
 				double change = pending - prevPending;
 				prevPending = pending;
-				if (change > 0) {
+				if (countCondition.apply(change)) {
 					pendingAccumulated += change;
 				}
 			}
@@ -254,5 +290,13 @@ public class WalletService {
 
 	public List<Chat> getChats() {
 		return chatRepository.findAll();
+	}
+
+	public void setThresholdMode(String chatId, String burstAddress, ThresholdMode mode) throws NoSuchElementException {
+		Optional<ChatWallet> chatWalletOpt = getChatWallet(chatId, burstAddress);
+		ChatWallet chatWallet = chatWalletOpt.get();
+
+		chatWallet.setThresholdMode(mode);
+		chatWalletRepository.save(chatWallet);
 	}
 }

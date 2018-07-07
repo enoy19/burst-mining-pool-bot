@@ -30,12 +30,23 @@ Arguments:
 Activates pending payment change notifications for the given wallet.\
 Arguments:
  * Burst Address
+ 
 ### /notification_threshold
-Sets the notification threshold of a wallet. Notifications will only be sent,
-when the overall pending payments exceed the threshold value.\
+Sets the notification threshold of a wallet.\
+See also: [/threshold_mode](https://github.com/enoy19/burst-mining-pool-bot#threshold_mode)\
 Arguments:
  * Burst Address
  * Threshold (double, must be positive.)
+ 
+### /threshold_mode
+See also: [/notification_threshold](https://github.com/enoy19/burst-mining-pool-bot#notification_threshold) \
+Arguments:
+ * Burst Address
+ * Threshold mode
+   * **ACCUMULATE:** Adds all incrementations of your pending payment and notifies you when the amount is greater than your threshold.
+   * **SINGLE:** Notifications will be sent when a single pending payment increase is greater than your threshold.
+   * **PAYOUT:** Works like accumulate but only counts payouts (pending payment decreases).
+
 ### /pending
 Shows the current pending payments for each wallet.
 

@@ -1,6 +1,7 @@
 package io.enoy.burst.bot.telegram.commands;
 
 import io.enoy.burst.bot.controller.service.WalletService;
+import io.enoy.burst.bot.model.ThresholdMode;
 import io.enoy.burst.bot.telegram.TelegramChatService;
 import io.enoy.burst.bot.telegram.scope.TelegramChatScope;
 import io.enoy.burst.bot.telegram.service.WalletKeyboardService;
@@ -8,16 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.objects.Message;
 
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Locale;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @TelegramChatScope
 @RequiredArgsConstructor
-public class NotificationThresholdCommand extends ValidatedArgumentCommand {
-
-	private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance(Locale.US);
+public class NotificationThresholdModeCommand extends ValidatedArgumentCommand {
 
 	private final TelegramChatService chatService;
 	private final WalletKeyboardService walletKeyboardService;
@@ -31,27 +30,28 @@ public class NotificationThresholdCommand extends ValidatedArgumentCommand {
 		return !walletsAvailable; // done only if no wallets are available
 	}
 
-
 	@Override
 	protected boolean validArgument(int argumentIndex, Message message) {
 		if (argumentIndex == 1) {
 			burstAddress = message.getText().trim();
-			chatService.sendMessage("Please enter your notification threshold. It must be positive!");
+
+			final List<String> modesList = Arrays.stream(ThresholdMode.values())
+					.map(ThresholdMode::name)
+					.collect(Collectors.toList());
+
+			final String[] modes = modesList.toArray(new String[ThresholdMode.values().length]);
+
+			chatService.sendKeyboard(getThresholdModesMessage(), true, modes);
 			return false;
 		} else if (argumentIndex == 2) {
-			try {
-				final double threshold = getThreshold(message);
-				final String chatId = String.valueOf(message.getChatId());
+			ThresholdMode mode = ThresholdMode.valueOf(message.getText());
+			final String chatId = String.valueOf(message.getChatId());
 
-				walletService.setChatNotificationThreshold(chatId, burstAddress, threshold);
+			walletService.setThresholdMode(chatId, burstAddress, mode);
 
-				final String response = String.format(Locale.US, "Threshold set to: %f", threshold);
-				chatService.sendMessage(response);
-			} catch (ParseException e) {
-				chatService.sendMessage("Something went wrong. Please try again");
-			}
-
+			chatService.sendMessage("Threshold mode set.");
 		}
+
 		return true;
 	}
 
@@ -63,6 +63,7 @@ public class NotificationThresholdCommand extends ValidatedArgumentCommand {
 	@Override
 	protected ValidationResult isArgumentValid(int argumentIndex, Message message) {
 		if (argumentIndex == 1) {
+			// yes I copied this part... I feel so bad now.
 			if (walletKeyboardService.isAbortMessage(message)) {
 				return ValidationResult.aborted();
 			}
@@ -77,11 +78,10 @@ public class NotificationThresholdCommand extends ValidatedArgumentCommand {
 
 		} else if (argumentIndex == 2 && message.hasText()) {
 			try {
-				final double threshold = getThreshold(message);
-				return ValidationResult.okWhen(() -> threshold >= 0)
-						.orElseGet(() -> ValidationResult.invalidArgument("Threshold must be positive."));
-			} catch (ParseException e) {
-				return ValidationResult.invalidArgument("Could not parse number.");
+				ThresholdMode.valueOf(message.getText());
+				return ValidationResult.ok();
+			} catch (IllegalArgumentException e) {
+				return ValidationResult.invalidArgument("Invalid threshold mode.");
 			}
 		}
 		chatService.sendMessage("Invalid argument!");
@@ -93,14 +93,17 @@ public class NotificationThresholdCommand extends ValidatedArgumentCommand {
 		chatService.removeKeyboard();
 	}
 
+	private String getThresholdModesMessage() {
+		final String thresholdModesHelpTexts =
+				Arrays.stream(ThresholdMode.values())
+						.map(mode -> String.format("%s - %s", mode.name(), mode.getHelpText()))
+						.collect(Collectors.joining("\n\n"));
+
+		return "Please select a threshold mode:\n" + thresholdModesHelpTexts;
+	}
+
 	@Override
 	public boolean accepts(String message) {
-		return message.equalsIgnoreCase("/notification_threshold");
+		return message.equalsIgnoreCase("/threshold_mode");
 	}
-
-	private double getThreshold(Message message) throws ParseException {
-		final String numberString = message.getText();
-		return NUMBER_FORMAT.parse(numberString).doubleValue();
-	}
-
 }
