@@ -22,24 +22,45 @@ import java.util.regex.Pattern;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@Profile("crypto-guru")
-public class CryptoGuruPoolDataGatherer implements WalletDataGatherer {
+@Profile({"crypto-guru", "goburstpool", "nogrod", "burstcoinro", "minertable"})
+public class HtmlMinerTableDataGatherer implements WalletDataGatherer {
 
 	private static final Pattern SHARE_PATTERN = Pattern.compile("([\\d.]+) %");
 	private static final Pattern EFFECTIVE_CAPACITY_PATTERN = Pattern.compile("([\\d.]+) TB");
 
 	private final WalletService walletService;
 
-	@Value("${cryptoguru.allminers.url}")
-	private String allMinersUrl;
+	@Value("${pool.url.base}")
+	private String poolBaseUrl;
+
+	@Value("${pool.url.minersPath:/miners}")
+	private String minersPath;
+
+	@Value("${pool.minerTable.id:miner-table}")
+	private String minerTableId;
+
+	@Value("${pool.minerTable.walletId.column:1}")
+	private int walletIdColumn;
+
+	@Value("${pool.minerTable.pending.column:2}")
+	private int pendingColumn;
+
+	@Value("${pool.minerTable.share.column:3}")
+	private int shareColumn;
+
+	@Value("${pool.minerTable.effectiveCapacity.column:4}")
+	private int effectiveCapacityColumn;
+
+	@Value("${pool.minerTable.confirmedDeadlines.column:5}")
+	private int confirmedDeadlinesColumn;
 
 	@Override
 	public List<WalletData> gatherDataOf(Collection<Wallet> wallets) {
 		final Document document;
 		try {
-			document = Jsoup.connect(allMinersUrl).get();
+			document = Jsoup.connect(getMinersUrl()).get();
 		} catch (IOException e) {
-			log.error("Could not retrieve cryptoguru wallet data");
+			log.error("Could not retrieve html table wallet data");
 			log.debug(e.getMessage(), e);
 			return null;
 		}
@@ -54,6 +75,12 @@ public class CryptoGuruPoolDataGatherer implements WalletDataGatherer {
 		final List<Wallet> onlyRegisteredWallets = walletService.getOnlyRegisteredWallets(walletIds);
 
 		return getWalletData(walletIdMinerMap, onlyRegisteredWallets);
+	}
+
+	private String getMinersUrl() {
+		// just for people like me who tend to forget the leading slash
+		final String minersPathWithSlash = minersPath.startsWith("/") ? minersPath : "/" + minersPath;
+		return poolBaseUrl + minersPathWithSlash;
 	}
 
 	private List<WalletData> getWalletData(Map<String, Elements> walletIdMinerMap, List<Wallet> wallets) {
@@ -86,14 +113,14 @@ public class CryptoGuruPoolDataGatherer implements WalletDataGatherer {
 	}
 
 	private Elements getMiners(Document document) {
-		final Element minerTable = document.getElementById("miner-table");
+		final Element minerTable = document.getElementById(minerTableId);
 		final Elements minerTableBodyElements = minerTable.getElementsByTag("tbody");
 		final Element minerTableBody = minerTableBodyElements.get(0);
 		return minerTableBody.getElementsByTag("tr");
 	}
 
 	private double getShare(Elements miner) {
-		final Element shareElement = miner.get(3);
+		final Element shareElement = miner.get(shareColumn);
 		final String shareText = shareElement.text().trim();
 		final Matcher matcher = SHARE_PATTERN.matcher(shareText);
 
@@ -106,13 +133,13 @@ public class CryptoGuruPoolDataGatherer implements WalletDataGatherer {
 	}
 
 	private double getPending(Elements miner) {
-		final String pendingString = miner.get(2).text().trim();
+		final String pendingString = miner.get(pendingColumn).text().trim();
 		return Double.parseDouble(pendingString);
 	}
 
 	// (remember: copy & paste isn't good!)
 	private double getEffectiveCapacity(Elements miner) {
-		final Element effectiveCapacityElement = miner.get(4);
+		final Element effectiveCapacityElement = miner.get(effectiveCapacityColumn);
 		final String effectiveCapacityText = effectiveCapacityElement.text().trim();
 		final Matcher matcher = EFFECTIVE_CAPACITY_PATTERN.matcher(effectiveCapacityText);
 
@@ -125,11 +152,15 @@ public class CryptoGuruPoolDataGatherer implements WalletDataGatherer {
 	}
 
 	private long getConfirmedDeadlines(Elements miner) {
-		final String confirmedDeadlinesString = miner.get(5).text().trim();
+		final String confirmedDeadlinesString = miner.get(confirmedDeadlinesColumn).text().trim();
 		return Long.parseLong(confirmedDeadlinesString);
 	}
 
+	/**
+	 * @param cells the table columns (td)
+	 * @return the miner id/address: BURST-AAAA-BBBB-CCCC-DDDDD
+	 */
 	private String getWalletId(Elements cells) {
-		return cells.get(1).child(0).text().trim();
+		return cells.get(walletIdColumn).child(0).text().trim();
 	}
 }
