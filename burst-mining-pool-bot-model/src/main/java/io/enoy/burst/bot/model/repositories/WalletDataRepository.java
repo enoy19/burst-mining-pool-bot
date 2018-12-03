@@ -16,4 +16,6 @@ public interface WalletDataRepository extends JpaRepository<WalletData, Long> {
 
 	List<WalletData> findAllByWallet(Wallet wallet);
 	List<WalletData> findAllByWalletAndTimestampAfter(Wallet wallet, Date afterThisDate);
+
+	void deleteByTimestampBefore(Date date);
 }
