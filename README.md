@@ -13,7 +13,8 @@ If you want to add a mining pool, please have a look at the wiki:
 Wiki: [Hosting and Configuration](https://github.com/enoy19/burst-mining-pool-bot/wiki/Hosting-and-Configuration)
 
 ## Supported Mining Pools
- * CryptoGuru Pool Software
+ * [Nogrod](https://github.com/PoC-Consortium/Nogrod) Pools (e.g. [Crypto-guru](https://50-50-pool.burst.cryptoguru.org/) + [Burstcoin.ro](https://pool.burstcoin.ro))
+ * All pools that provide an HTML table (GET Request) with the [Nogrod /miners](https://50-50-pool.burst.cryptoguru.org/miners) layout (path, table id & column indexes can be configured)
  
 ## Commands
 ### /add_wallet
